@@ -1,0 +1,263 @@
+// app/input/page.tsx
+'use client'
+
+import { useState } from 'react'
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { format } from 'date-fns'
+import { Calendar as CalendarIcon, Trash2 } from 'lucide-react'
+
+import { cn } from '@/lib/utils'
+import { useFinancialStore } from '@/store/financialStore'
+import { Category, FinancialEntry } from '@/types/financial'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+
+// Zod schema for form validation
+const formSchema = z.object({
+  date: z.date(),
+  category: z.nativeEnum(Category),
+  subcategory: z.string().optional(),
+  amount: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+    message: "Amount must be a positive number",
+  }),
+  description: z.string().optional(),
+})
+
+type FormData = z.infer<typeof formSchema>
+
+const categoryColors: Record<Category, string> = {
+  [Category.REVENUE]: 'bg-green-100/50 dark:bg-green-900/20',
+  [Category.COGS]: 'bg-red-100/50 dark:bg-red-900/20',
+  [Category.OPEX]: 'bg-orange-100/50 dark:bg-orange-900/20',
+  [Category.ASSET]: 'bg-blue-100/50 dark:bg-blue-900/20',
+  [Category.LIABILITY]: 'bg-purple-100/50 dark:bg-purple-900/20',
+  [Category.EQUITY]: 'bg-teal-100/50 dark:bg-teal-900/20',
+  [Category.CAPEX]: 'bg-indigo-100/50 dark:bg-indigo-900/20',
+  [Category.DA]: 'bg-gray-100/50 dark:bg-gray-900/20',
+  [Category.INTEREST]: 'bg-yellow-100/50 dark:bg-yellow-900/20',
+  [Category.TAX]: 'bg-pink-100/50 dark:bg-pink-900/20',
+}
+
+export default function InputPage() {
+  // TODO: Replace with useTranslation hook
+  const t = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  const { entries, addEntry, removeEntry, clearAllEntries } = useFinancialStore()
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      date: new Date(),
+    },
+  });
+
+  const onSubmit = (data: FormData) => {
+    const newEntry: Omit<FinancialEntry, 'id'> = {
+      ...data,
+      category: data.category,
+      subcategory: data.subcategory || '',
+      description: data.description || '',
+      amount: Number(data.amount),
+      date: data.date.toISOString(),
+    }
+    addEntry(newEntry)
+    reset()
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-light tracking-tight text-slate-900">{t('data_input')}</h1>
+      
+      <Card className="border-slate-200/60 shadow-sm bg-white rounded-2xl overflow-hidden">
+        <CardHeader className="border-b border-slate-100/50 bg-slate-50/50 pb-4">
+          <CardTitle className="text-lg font-medium text-slate-800">{t('add_new_entry')}</CardTitle>
+          <CardDescription className="text-slate-500">{t('fill_out_the_form_to_add_a_financial_record')}</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {/* Date Picker */}
+            <div className="flex flex-col space-y-1.5">
+              <label>{t('date')}</label>
+              <Controller
+                control={control}
+                name="date"
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'justify-start text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, 'PPP') : <span>{t('pick_a_date')}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.date && <p className="text-sm text-red-500">{errors.date.message}</p>}
+            </div>
+
+            {/* Category Select */}
+            <div className="flex flex-col space-y-1.5">
+              <label>{t('category')}</label>
+              <Controller
+                control={control}
+                name="category"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('select_category')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(Category).map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
+            </div>
+
+            {/* Subcategory Input */}
+            <div className="flex flex-col space-y-1.5">
+              <label>{t('subcategory')}</label>
+              <Input {...register('subcategory')} placeholder={t('e_g_salaries')} />
+            </div>
+
+            {/* Amount Input */}
+            <div className="flex flex-col space-y-1.5">
+              <label>{t('amount')}</label>
+              <Input {...register('amount')} type="number" step="0.01" placeholder="0.00" />
+              {errors.amount && <p className="text-sm text-red-500">{errors.amount.message}</p>}
+            </div>
+
+            {/* Description Textarea */}
+            <div className="flex flex-col space-y-1.5 md:col-span-2 lg:col-span-full">
+              <label>{t('description')}</label>
+              <Textarea {...register('description')} placeholder={t('optional_description')} />
+            </div>
+
+            <Button type="submit" className="lg:col-start-5">{t('add_entry')}</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200/60 shadow-sm bg-white rounded-2xl overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100/50 bg-slate-50/50 pb-4">
+          <CardTitle className="text-lg font-medium text-slate-800">{t('existing_entries')}</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">{t('import_csv')}</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={entries.length === 0}>{t('clear_all')}</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('are_you_sure')}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('this_action_cannot_be_undone')}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => { clearAllEntries() }}>{t('continue')}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('date')}</TableHead>
+                  <TableHead>{t('category')}</TableHead>
+                  <TableHead>{t('subcategory')}</TableHead>
+                  <TableHead className="text-right">{t('amount')}</TableHead>
+                  <TableHead>{t('description')}</TableHead>
+                  <TableHead className="text-right">{t('actions')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {entries.length > 0 ? (
+                  entries.map((entry) => (
+                    <TableRow key={entry.id} className={categoryColors[entry.category]}>
+                      <TableCell>{format(new Date(entry.date), 'yyyy-MM-dd')}</TableCell>
+                      <TableCell><span className="font-mono text-xs">{entry.category}</span></TableCell>
+                      <TableCell>{entry.subcategory}</TableCell>
+                      <TableCell className="text-right font-medium">{entry.amount.toFixed(2)}</TableCell>
+                      <TableCell>{entry.description}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => removeEntry(entry.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">{t('no_entries_found')}</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

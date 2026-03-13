@@ -1,0 +1,59 @@
+/* app/globals.css */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/700.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', sans-serif;
+    --font-jetbrains-mono: 'JetBrains Mono', monospace;
+    /* ... shadcn variables */
+  }
+}
+
+@layer components {
+  .financial-table {
+    @apply w-full text-sm border-collapse;
+  }
+  .financial-table th {
+    @apply sticky top-0 bg-slate-100 dark:bg-slate-800 p-2 text-left font-semibold text-financial-header;
+  }
+  .financial-table td {
+    @apply p-2 border-b border-slate-200 dark:border-slate-700;
+  }
+  .financial-table tbody tr:nth-child(even) {
+    @apply bg-slate-50 dark:bg-slate-800/50;
+  }
+  .financial-table .subtotal-row {
+    @apply font-semibold border-t-2 border-slate-300 dark:border-slate-600;
+  }
+  .financial-table .total-row {
+    @apply font-bold border-t-4 border-double border-slate-400 dark:border-slate-500 bg-slate-100 dark:bg-slate-800;
+  }
+  .financial-table td:nth-child(n+2) {
+    @apply font-mono text-right;
+  }
+}
+
+@layer utilities {
+  .kpi-number {
+    font-variant-numeric: tabular-nums;
+    @apply text-2xl md:text-3xl;
+  }
+  .input-blue {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+  .formula-black {
+    @apply text-slate-900 dark:text-slate-100;
+  }
+  .link-green {
+    @apply text-financial-positive;
+  }
+}

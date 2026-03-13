@@ -1,0 +1,32 @@
+{
+  "navigation": {
+    "tax_rates": "Tax Rates"
+  },
+  "tax_rates": {
+    "title": "Global Tax Reference",
+    "subtitle": "Current tax rates by country — updated reference guide",
+    "disclaimer": "⚠️ Disclaimer: Tax rates shown are for informational purposes only and may change. Always consult a licensed tax advisor for your specific situation. Rates as of 2024-2025.",
+    "search_placeholder": "Filter by country or tax type...",
+    "region_all": "All",
+    "region_europe": "Europe",
+    "region_asia": "Asia",
+    "region_americas": "Americas",
+    "region_cis": "CIS/Post-Soviet",
+    "featured_georgia": "Featured: Georgia 🇬🇪",
+    "estonian_model_note": "Georgia uses the Estonian CIT model: Corporate tax is paid only when profits are distributed, not on retained earnings.",
+    "comparison_table_title": "Comparison Table (Top 25 Countries)",
+    "deep_dive_title": "Tax Type Deep Dive",
+    "calculator_title": "Net Salary Calculator",
+    "headers": {
+      "country": "Country",
+      "vat_gst": "VAT/GST",
+      "corporate_tax": "Corporate Tax",
+      "personal_income": "Personal Income",
+      "dividend": "Dividend",
+      "capital_gains": "Capital Gains",
+      "tax_type": "Tax Type",
+      "rate": "Rate",
+      "notes": "Notes"
+    }
+  }
+}

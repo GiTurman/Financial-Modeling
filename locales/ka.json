@@ -1,0 +1,19 @@
+{
+  "dashboard": "დეშბორდი",
+  "data_input": "მონაცემების შეყვანა",
+  "income_statement": "მოგება-ზარალის უწყისი",
+  "balance_sheet": "ბალანსი",
+  "cash_flow": "ფულადი ნაკადები",
+  "assumptions": "დაშვებები",
+  "scenarios": "სცენარები",
+  "ai_analysis": "AI ანალიზი",
+  "revenue": "შემოსავალი",
+  "netIncome": "წმინდა მოგება",
+  "ebitda": "EBITDA",
+  "totalAssets": "მთლიანი აქტივები",
+  "totalLiabilities": "მთლიანი ვალდებულებები",
+  "currentRatio": "მიმდინარე ლიკვიდობა",
+  "insights": "ინსაიტები",
+  "recommendations": "რეკომენდაციები",
+  "analyze": "ანალიზი Gemini-ით"
+}
