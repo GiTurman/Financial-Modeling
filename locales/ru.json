@@ -64,6 +64,7 @@
   "existing_entries": "Существующие записи",
   "import_xlsx": "Импорт XLSX",
   "export_xlsx": "Экспорт XLSX",
+  "download_template": "Скачать шаблон",
   "clear_all": "Очистить все",
   "are_you_sure": "Вы уверены?",
   "this_action_cannot_be_undone": "Это действие нельзя отменить",

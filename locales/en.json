@@ -64,6 +64,7 @@
   "existing_entries": "Existing Entries",
   "import_xlsx": "Import XLSX",
   "export_xlsx": "Export XLSX",
+  "download_template": "Download Template",
   "clear_all": "Clear All",
   "are_you_sure": "Are you sure?",
   "this_action_cannot_be_undone": "This action cannot be undone",

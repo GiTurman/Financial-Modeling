@@ -7,7 +7,7 @@ import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { format } from 'date-fns'
-import { Calendar as CalendarIcon, Trash2, Upload, Download } from 'lucide-react'
+import { Calendar as CalendarIcon, Trash2, Upload, Download, FileSpreadsheet } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { exportToXLSX } from '@/lib/export'
 
@@ -100,6 +100,33 @@ export default function InputPage() {
       [t('description')]: entry.description,
     }))
     exportToXLSX(data, 'Financial_Entries', 'Entries')
+  }
+
+  const downloadTemplate = () => {
+    const templateData = [
+      {
+        date: '2024-03-01',
+        category: Category.REVENUE,
+        subcategory: 'Sales',
+        amount: 5000,
+        description: 'Monthly sales revenue'
+      },
+      {
+        date: '2024-03-05',
+        category: Category.OPEX,
+        subcategory: 'Rent',
+        amount: 1200,
+        description: 'Office rent'
+      },
+      {
+        date: '2024-03-10',
+        category: Category.SALARY,
+        subcategory: 'Engineering',
+        amount: 3000,
+        description: 'Developer salary'
+      }
+    ]
+    exportToXLSX(templateData, 'Financial_Entries_Template', 'Template')
   }
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
@@ -261,6 +288,10 @@ export default function InputPage() {
             <Button variant="outline" size="sm" onClick={handleExport} disabled={entries.length === 0}>
               <Download className="mr-2 h-4 w-4" />
               {t('export_xlsx')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={downloadTemplate}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              {t('download_template')}
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>

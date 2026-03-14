@@ -43,6 +43,7 @@
   "existing_entries": "არსებული ჩანაწერები",
   "import_xlsx": "XLSX იმპორტი",
   "export_xlsx": "XLSX ექსპორტი",
+  "download_template": "შაბლონის ჩამოტვირთვა",
   "clear_all": "ყველას წაშლა",
   "are_you_sure": "დარწმუნებული ხართ?",
   "this_action_cannot_be_undone": "ეს მოქმედება შეუქცევადია",
