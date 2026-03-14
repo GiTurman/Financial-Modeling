@@ -7,7 +7,7 @@ import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { format } from 'date-fns'
-import { Calendar as CalendarIcon, Trash2, Upload, Download, FileSpreadsheet } from 'lucide-react'
+import { Calendar as CalendarIcon, Trash2, Upload, Download, FileSpreadsheet, Edit2 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { exportToXLSX } from '@/lib/export'
 
@@ -88,12 +88,13 @@ const categoryColors: Record<Category, string> = {
 export default function InputPage() {
   const { t } = useTranslation()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
-  const { entries, addEntry, removeEntry, clearAllEntries } = useFinancialStore()
+  const { entries, addEntry, updateEntry, removeEntry, clearAllEntries } = useFinancialStore()
 
   const handleExport = () => {
     const data = entries.map(entry => ({
-      [t('date')]: format(new Date(entry.date), 'yyyy-MM-dd'),
+      [t('date')]: format(new Date(entry.date), 'dd-MM-yyyy'),
       [t('category')]: entry.category,
       [t('subcategory')]: entry.subcategory,
       [t('amount')]: entry.amount,
@@ -105,21 +106,21 @@ export default function InputPage() {
   const downloadTemplate = () => {
     const templateData = [
       {
-        date: '2024-03-01',
+        date: '2026-03-01',
         category: Category.REVENUE,
         subcategory: 'Sales',
         amount: 5000,
         description: 'Monthly sales revenue'
       },
       {
-        date: '2024-03-05',
+        date: '2026-03-05',
         category: Category.OPEX,
         subcategory: 'Rent',
         amount: 1200,
         description: 'Office rent'
       },
       {
-        date: '2024-03-10',
+        date: '2026-03-10',
         category: Category.SALARY,
         subcategory: 'Engineering',
         amount: 3000,
@@ -137,7 +138,7 @@ export default function InputPage() {
   });
 
   const onSubmit = (data: FormData) => {
-    const newEntry: Omit<FinancialEntry, 'id'> = {
+    const entryData: Omit<FinancialEntry, 'id'> = {
       ...data,
       category: data.category,
       subcategory: data.subcategory || '',
@@ -145,8 +146,37 @@ export default function InputPage() {
       amount: Number(data.amount),
       date: data.date.toISOString(),
     }
-    addEntry(newEntry)
+    
+    if (editingId) {
+      updateEntry(editingId, entryData)
+      setEditingId(null)
+    } else {
+      addEntry(entryData)
+    }
     reset()
+  }
+
+  const handleEdit = (entry: FinancialEntry) => {
+    setEditingId(entry.id)
+    reset({
+      date: new Date(entry.date),
+      category: entry.category,
+      subcategory: entry.subcategory,
+      amount: entry.amount.toString(),
+      description: entry.description,
+    })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    reset({
+      date: new Date(),
+      category: undefined,
+      subcategory: '',
+      amount: '',
+      description: '',
+    })
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -265,7 +295,16 @@ export default function InputPage() {
               <Textarea {...register('description')} placeholder={t('optional_description')} />
             </div>
 
-            <Button type="submit" className="lg:col-start-5">{t('add_entry')}</Button>
+            <div className="flex gap-2 lg:col-start-5">
+              {editingId && (
+                <Button type="button" variant="outline" onClick={handleCancelEdit} className="w-full">
+                  {t('cancel')}
+                </Button>
+              )}
+              <Button type="submit" className="w-full">
+                {editingId ? t('update_entry') : t('add_entry')}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -327,12 +366,15 @@ export default function InputPage() {
                 {entries.length > 0 ? (
                   entries.map((entry) => (
                     <TableRow key={entry.id} className={categoryColors[entry.category]}>
-                      <TableCell>{format(new Date(entry.date), 'yyyy-MM-dd')}</TableCell>
+                      <TableCell>{format(new Date(entry.date), 'dd-MM-yyyy')}</TableCell>
                       <TableCell><span className="font-mono text-xs">{entry.category}</span></TableCell>
                       <TableCell>{entry.subcategory}</TableCell>
                       <TableCell className="text-right font-medium">{entry.amount.toFixed(2)}</TableCell>
                       <TableCell>{entry.description}</TableCell>
                       <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(entry)}>
+                          <Edit2 className="h-4 w-4 text-blue-500" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => removeEntry(entry.id)}>
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>

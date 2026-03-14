@@ -56,6 +56,7 @@ interface FinancialState {
   
   // Actions
   addEntry: (entry: Omit<FinancialEntry, 'id'>) => void;
+  updateEntry: (id: string, entry: Omit<FinancialEntry, 'id'>) => void;
   removeEntry: (id: string) => void;
   clearAllEntries: () => void;
   setLanguage: (lang: 'ka' | 'en' | 'ru') => void;
@@ -122,7 +123,7 @@ export const useFinancialStore = create<FinancialState>((set, get) => {
   return {
     // Initial State
     entries: [],
-    selectedPeriod: '2024-Q1',
+    selectedPeriod: '2026-Q1',
     language: 'ka',
     currency: 'GEL',
     modelDuration: 1,
@@ -140,6 +141,11 @@ export const useFinancialStore = create<FinancialState>((set, get) => {
     addEntry: (entry) =>
       set((state) => ({
         entries: [...state.entries, { ...entry, id: new Date().toISOString() }],
+      })),
+
+    updateEntry: (id, entry) =>
+      set((state) => ({
+        entries: state.entries.map((e) => (e.id === id ? { ...entry, id } : e)),
       })),
 
     removeEntry: (id) =>
@@ -165,7 +171,7 @@ export const useFinancialStore = create<FinancialState>((set, get) => {
     setCurrency: (currency) => set({ currency }),
     setModelDuration: (duration) => set({ modelDuration: duration }),
     setViewMode: (mode) => set((state) => {
-      const startYear = 2024;
+      const startYear = 2026;
       let newPeriod = state.selectedPeriod;
       if (mode === 'monthly') newPeriod = `${startYear}-01`;
       else if (mode === 'quarterly') newPeriod = `${startYear}-Q1`;

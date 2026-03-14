@@ -47,6 +47,8 @@
   "clear_all": "ყველას წაშლა",
   "are_you_sure": "დარწმუნებული ხართ?",
   "this_action_cannot_be_undone": "ეს მოქმედება შეუქცევადია",
+  "add_entry": "დამატება",
+  "update_entry": "განახლება",
   "cancel": "გაუქმება",
   "continue": "გაგრძელება",
   "actions": "მოქმედებები",

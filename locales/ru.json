@@ -68,6 +68,8 @@
   "clear_all": "Очистить все",
   "are_you_sure": "Вы уверены?",
   "this_action_cannot_be_undone": "Это действие нельзя отменить",
+  "add_entry": "Добавить",
+  "update_entry": "Обновить",
   "cancel": "Отмена",
   "continue": "Продолжить",
   "actions": "Действия",

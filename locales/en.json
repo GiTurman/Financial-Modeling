@@ -68,6 +68,8 @@
   "clear_all": "Clear All",
   "are_you_sure": "Are you sure?",
   "this_action_cannot_be_undone": "This action cannot be undone",
+  "add_entry": "Add Entry",
+  "update_entry": "Update Entry",
   "cancel": "Cancel",
   "continue": "Continue",
   "actions": "Actions",
