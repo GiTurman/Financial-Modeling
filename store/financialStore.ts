@@ -37,6 +37,9 @@ interface FinancialState {
   entries: FinancialEntry[];
   selectedPeriod: string;
   language: 'ka' | 'en' | 'ru';
+  currency: 'GEL' | 'USD' | 'EUR';
+  modelDuration: number; // in years
+  viewMode: 'monthly' | 'quarterly' | 'yearly';
   
   // --- NEW: Global Settings ---
   globalSettings: GlobalSettings;
@@ -55,6 +58,11 @@ interface FinancialState {
   addEntry: (entry: Omit<FinancialEntry, 'id'>) => void;
   removeEntry: (id: string) => void;
   clearAllEntries: () => void;
+  setLanguage: (lang: 'ka' | 'en' | 'ru') => void;
+  setCurrency: (currency: 'GEL' | 'USD' | 'EUR') => void;
+  setModelDuration: (duration: number) => void;
+  setViewMode: (mode: 'monthly' | 'quarterly' | 'yearly') => void;
+  setSelectedPeriod: (period: string) => void;
 
   // Computed Selectors
   getIncomeStatement: (scenario?: ScenarioType) => IncomeStatement;
@@ -81,17 +89,34 @@ const defaultAssumptions: Assumptions = {
 
 export const useFinancialStore = create<FinancialState>((set, get) => {
   const getModifiedEntries = (scenario?: ScenarioType) => {
-    const { entries, scenarios, activeScenario } = get()
+    const { entries, scenarios, activeScenario, selectedPeriod, viewMode } = get()
     const targetScenario = scenario || activeScenario
     const multipliers = scenarios[targetScenario]
     
-    return entries.map(e => {
-      if (e.category === Category.REVENUE) return {...e, amount: e.amount * multipliers.revenue}
-      if (e.category === Category.COGS) return {...e, amount: e.amount * multipliers.cogs}
-      if (e.category === Category.OPEX) return {...e, amount: e.amount * multipliers.opex}
-      if (e.category === Category.SALARY) return {...e, amount: e.amount * multipliers.opex}
-      return e
-    })
+    const getPeriodFromDate = (dateStr: string, mode: 'monthly' | 'quarterly' | 'yearly'): string => {
+      const date = new Date(dateStr);
+      const year = date.getFullYear();
+      if (mode === 'yearly') return `${year}-FY`;
+      if (mode === 'monthly') {
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        return `${year}-${month}`;
+      }
+      if (mode === 'quarterly') {
+        const quarter = Math.floor(date.getMonth() / 3) + 1;
+        return `${year}-Q${quarter}`;
+      }
+      return '';
+    };
+
+    return entries
+      .filter(e => getPeriodFromDate(e.date, viewMode) === selectedPeriod)
+      .map(e => {
+        if (e.category === Category.REVENUE) return {...e, amount: e.amount * multipliers.revenue}
+        if (e.category === Category.COGS) return {...e, amount: e.amount * multipliers.cogs}
+        if (e.category === Category.OPEX) return {...e, amount: e.amount * multipliers.opex}
+        if (e.category === Category.SALARY) return {...e, amount: e.amount * multipliers.opex}
+        return e
+      })
   }
 
   return {
@@ -99,6 +124,9 @@ export const useFinancialStore = create<FinancialState>((set, get) => {
     entries: [],
     selectedPeriod: '2024-Q1',
     language: 'ka',
+    currency: 'GEL',
+    modelDuration: 1,
+    viewMode: 'quarterly',
     globalSettings: defaultGlobalSettings,
     assumptions: defaultAssumptions,
     activeScenario: 'base',
@@ -132,6 +160,20 @@ export const useFinancialStore = create<FinancialState>((set, get) => {
       })),
 
     setScenario: (scenario) => set({ activeScenario: scenario }),
+
+    setLanguage: (lang) => set({ language: lang }),
+    setCurrency: (currency) => set({ currency }),
+    setModelDuration: (duration) => set({ modelDuration: duration }),
+    setViewMode: (mode) => set((state) => {
+      const startYear = 2024;
+      let newPeriod = state.selectedPeriod;
+      if (mode === 'monthly') newPeriod = `${startYear}-01`;
+      else if (mode === 'quarterly') newPeriod = `${startYear}-Q1`;
+      else if (mode === 'yearly') newPeriod = `${startYear}-FY`;
+      
+      return { viewMode: mode, selectedPeriod: newPeriod };
+    }),
+    setSelectedPeriod: (period) => set({ selectedPeriod: period }),
 
     // Computed Selectors
     getIncomeStatement: (scenario) => {

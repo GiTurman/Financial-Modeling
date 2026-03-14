@@ -1,13 +1,15 @@
 // app/input/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { format } from 'date-fns'
-import { Calendar as CalendarIcon, Trash2 } from 'lucide-react'
+import { Calendar as CalendarIcon, Trash2, Upload, Download } from 'lucide-react'
+import * as XLSX from 'xlsx'
+import { exportToXLSX } from '@/lib/export'
 
 import { cn } from '@/lib/utils'
 import { useFinancialStore } from '@/store/financialStore'
@@ -85,8 +87,21 @@ const categoryColors: Record<Category, string> = {
 
 export default function InputPage() {
   const { t } = useTranslation()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const { entries, addEntry, removeEntry, clearAllEntries } = useFinancialStore()
+
+  const handleExport = () => {
+    const data = entries.map(entry => ({
+      [t('date')]: format(new Date(entry.date), 'yyyy-MM-dd'),
+      [t('category')]: entry.category,
+      [t('subcategory')]: entry.subcategory,
+      [t('amount')]: entry.amount,
+      [t('description')]: entry.description,
+    }))
+    exportToXLSX(data, 'Financial_Entries', 'Entries')
+  }
+
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -105,6 +120,36 @@ export default function InputPage() {
     }
     addEntry(newEntry)
     reset()
+  }
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const bstr = evt.target?.result
+      const wb = XLSX.read(bstr, { type: 'binary' })
+      const wsname = wb.SheetNames[0]
+      const ws = wb.Sheets[wsname]
+      const data = XLSX.utils.sheet_to_json(ws) as any[]
+
+      data.forEach((row) => {
+        // Basic validation and mapping
+        if (row.date && row.category && row.amount) {
+          const newEntry: Omit<FinancialEntry, 'id'> = {
+            date: new Date(row.date).toISOString(),
+            category: row.category as Category,
+            subcategory: row.subcategory || '',
+            amount: Number(row.amount),
+            description: row.description || '',
+          }
+          addEntry(newEntry)
+        }
+      })
+    }
+    reader.readAsBinaryString(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   return (
@@ -202,7 +247,21 @@ export default function InputPage() {
         <CardHeader>
           <CardTitle>{t('existing_entries')}</CardTitle>
           <div className="flex items-center gap-2 pt-2">
-            <Button variant="outline" size="sm">{t('import_csv')}</Button>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".xlsx, .xls"
+              className="hidden"
+            />
+            <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="mr-2 h-4 w-4" />
+              {t('import_xlsx')}
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={entries.length === 0}>
+              <Download className="mr-2 h-4 w-4" />
+              {t('export_xlsx')}
+            </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" size="sm" disabled={entries.length === 0}>{t('clear_all')}</Button>

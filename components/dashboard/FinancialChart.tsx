@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatCurrency } from '@/lib/utils'
 
 interface FinancialChartProps {
   type: 'bar' | 'line' | 'donut'
@@ -19,11 +20,13 @@ interface FinancialChartProps {
   height?: number
   colors?: string[]
   loading?: boolean
+  locale?: string
+  currency?: string
 }
 
 const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#f43f5e', '#f59e0b']
 
-export function FinancialChart({ type, data, title, height = 300, colors = DEFAULT_COLORS, loading }: FinancialChartProps) {
+export function FinancialChart({ type, data, title, height = 300, colors = DEFAULT_COLORS, loading, locale = 'en-US', currency = 'USD' }: FinancialChartProps) {
   const chartRef = useRef<HTMLDivElement>(null)
 
   const handleExport = () => {
@@ -48,8 +51,8 @@ export function FinancialChart({ type, data, title, height = 300, colors = DEFAU
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <YAxis tickFormatter={(v) => formatCurrency(v, locale, currency).split('.')[0]} />
+            <Tooltip formatter={(v) => formatCurrency(Number(v), locale, currency)} />
             <Legend />
             <Bar dataKey="revenue" fill={colors[0]} />
             <Bar dataKey="expenses" fill={colors[1]} />
@@ -60,8 +63,8 @@ export function FinancialChart({ type, data, title, height = 300, colors = DEFAU
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
+            <YAxis tickFormatter={(v) => formatCurrency(v, locale, currency).split('.')[0]} />
+            <Tooltip formatter={(v) => formatCurrency(Number(v), locale, currency)} />
             <Legend />
             <Line type="monotone" dataKey="netIncome" stroke={colors[0]} />
           </LineChart>
@@ -72,7 +75,7 @@ export function FinancialChart({ type, data, title, height = 300, colors = DEFAU
             <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} fill={colors[0]}>
               {data.map((entry, index) => <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />)}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={(v) => formatCurrency(Number(v), locale, currency)} />
             <Legend />
           </PieChart>
         )

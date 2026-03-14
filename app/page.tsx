@@ -10,7 +10,7 @@ import { FinancialChart } from '@/components/dashboard/FinancialChart';
 
 const Dashboard: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { activeScenario, getIncomeStatement, getBalanceSheet } = useFinancialStore();
+  const { activeScenario, getIncomeStatement, getBalanceSheet, currency } = useFinancialStore();
   
   const incomeStatement = getIncomeStatement();
   const balanceSheet = getBalanceSheet();
@@ -42,21 +42,21 @@ const Dashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title={t('revenue')}
-          value={formatCurrency(incomeStatement.revenue, i18n.language)}
+          value={formatCurrency(incomeStatement.revenue, i18n.language, currency)}
           change={12}
           icon={TrendingUp}
           color="purple"
         />
         <KPICard
           title={t('netIncome')}
-          value={formatCurrency(incomeStatement.netIncome, i18n.language)}
+          value={formatCurrency(incomeStatement.netIncome, i18n.language, currency)}
           change={8}
           icon={DollarSign}
           color="green"
         />
         <KPICard
           title={t('ebitda')}
-          value={formatCurrency(incomeStatement.ebitda, i18n.language)}
+          value={formatCurrency(incomeStatement.ebitda, i18n.language, currency)}
           change={15}
           icon={BarChart2}
           color="orange"
@@ -74,11 +74,15 @@ const Dashboard: React.FC = () => {
           type="line"
           data={chartData}
           title={`${t('revenue')} Trend`}
+          locale={i18n.language}
+          currency={currency}
         />
         <FinancialChart
           type="bar"
           data={chartData}
           title={`${t('netIncome')} Performance`}
+          locale={i18n.language}
+          currency={currency}
         />
       </div>
     </div>

@@ -32,7 +32,7 @@ i18n
     resources,
     fallbackLng: 'en', // Fallback language if detection fails
     defaultNS: 'translation',
-    lng: 'ka', // Default language
+    // lng: 'ka', // Removed hardcoded language to allow detector to work
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
@@ -41,6 +41,9 @@ i18n
     interpolation: {
       escapeValue: false, // React already safes from xss
     },
+    react: {
+      useSuspense: false, // Avoid issues with SSR/Hydration
+    }
   })
 
 export default i18n
