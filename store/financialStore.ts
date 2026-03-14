@@ -9,6 +9,7 @@ import {
   BalanceSheet,
   CashFlow,
   Category,
+  GlobalSettings,
 } from '@/types/financial'
 import {
   calculateIncomeStatement,
@@ -37,6 +38,10 @@ interface FinancialState {
   selectedPeriod: string;
   language: 'ka' | 'en' | 'ru';
   
+  // --- NEW: Global Settings ---
+  globalSettings: GlobalSettings;
+  setGlobalSetting: <K extends keyof GlobalSettings>(key: K, value: GlobalSettings[K]) => void;
+
   // --- NEW: Assumptions State ---
   assumptions: Assumptions;
   setAssumption: <K extends keyof Assumptions>(key: K, value: Assumptions[K]) => void;
@@ -57,6 +62,16 @@ interface FinancialState {
   getCashFlow: (scenario?: ScenarioType) => CashFlow;
 }
 
+const defaultGlobalSettings: GlobalSettings = {
+  vatRate: 18,
+  salaryTaxRate: 20,
+  pensionRate: 4, // 2% employee + 2% employer
+  corporateTaxRate: 15,
+  dso: 30,
+  dpo: 30,
+  exchangeRate: 1.0,
+};
+
 const defaultAssumptions: Assumptions = {
   revenueGrowth: 10,
   cogsPercentage: 60,
@@ -64,69 +79,80 @@ const defaultAssumptions: Assumptions = {
   taxRate: 15,
 };
 
-export const useFinancialStore = create<FinancialState>((set, get) => ({
-  // Initial State
-  entries: [],
-  selectedPeriod: '2024-Q1',
-  language: 'en',
-  assumptions: defaultAssumptions,
-  activeScenario: 'base',
-  scenarios: {
-    base: { revenue: 1.0, cogs: 1.0, opex: 1.0 },
-    bull: { revenue: 1.25, cogs: 0.95, opex: 1.1 },
-    bear: { revenue: 0.85, cogs: 1.05, opex: 0.9 },
-  },
-
-  // Actions
-  addEntry: (entry) =>
-    set((state) => ({
-      entries: [...state.entries, { ...entry, id: new Date().toISOString() }],
-    })),
-
-  removeEntry: (id) =>
-    set((state) => ({
-      entries: state.entries.filter((entry) => entry.id !== id),
-    })),
-  
-  clearAllEntries: () => set({ entries: [] }),
-
-  setAssumption: (key, value) =>
-    set((state) => ({
-      assumptions: { ...state.assumptions, [key]: value },
-    })),
-
-  setScenario: (scenario) => set({ activeScenario: scenario }),
-
-  // Computed Selectors
-  getIncomeStatement: (scenario) => {
-    const { entries, assumptions, scenarios, activeScenario } = get()
+export const useFinancialStore = create<FinancialState>((set, get) => {
+  const getModifiedEntries = (scenario?: ScenarioType) => {
+    const { entries, scenarios, activeScenario } = get()
     const targetScenario = scenario || activeScenario
     const multipliers = scenarios[targetScenario]
     
-    // IMPORTANT: This is a simplified application of multipliers.
-    // A real model would use assumptions to project future entries,
-    // then apply scenario multipliers to those projections.
-    const modifiedEntries = entries.map(e => {
-        if (e.category === Category.REVENUE) return {...e, amount: e.amount * multipliers.revenue}
-        if (e.category === Category.COGS) return {...e, amount: e.amount * multipliers.cogs}
-        if (e.category === Category.OPEX) return {...e, amount: e.amount * multipliers.opex}
-        return e
+    return entries.map(e => {
+      if (e.category === Category.REVENUE) return {...e, amount: e.amount * multipliers.revenue}
+      if (e.category === Category.COGS) return {...e, amount: e.amount * multipliers.cogs}
+      if (e.category === Category.OPEX) return {...e, amount: e.amount * multipliers.opex}
+      if (e.category === Category.SALARY) return {...e, amount: e.amount * multipliers.opex}
+      return e
     })
+  }
 
-    return calculateIncomeStatement(modifiedEntries)
-  },
+  return {
+    // Initial State
+    entries: [],
+    selectedPeriod: '2024-Q1',
+    language: 'ka',
+    globalSettings: defaultGlobalSettings,
+    assumptions: defaultAssumptions,
+    activeScenario: 'base',
+    scenarios: {
+      base: { revenue: 1.0, cogs: 1.0, opex: 1.0 },
+      bull: { revenue: 1.25, cogs: 0.95, opex: 1.1 },
+      bear: { revenue: 0.85, cogs: 1.05, opex: 0.9 },
+    },
 
-  getBalanceSheet: (scenario) => {
-    // Balance sheet calculations would also need to be scenario-aware
-    const { entries } = get()
-    return calculateBalanceSheet(entries)
-  },
+    // Actions
+    addEntry: (entry) =>
+      set((state) => ({
+        entries: [...state.entries, { ...entry, id: new Date().toISOString() }],
+      })),
 
-  getCashFlow: (scenario) => {
-    const incomeStatement = get().getIncomeStatement(scenario)
-    const balanceSheet = get().getBalanceSheet(scenario)
-    // Placeholder for previous period's balance sheet
-    const prevBalanceSheet = get().getBalanceSheet(scenario) 
-    return calculateCashFlow(incomeStatement, balanceSheet, prevBalanceSheet)
-  },
-}))
+    removeEntry: (id) =>
+      set((state) => ({
+        entries: state.entries.filter((entry) => entry.id !== id),
+      })),
+    
+    clearAllEntries: () => set({ entries: [] }),
+
+    setGlobalSetting: (key, value) =>
+      set((state) => ({
+        globalSettings: { ...state.globalSettings, [key]: value },
+      })),
+
+    setAssumption: (key, value) =>
+      set((state) => ({
+        assumptions: { ...state.assumptions, [key]: value },
+      })),
+
+    setScenario: (scenario) => set({ activeScenario: scenario }),
+
+    // Computed Selectors
+    getIncomeStatement: (scenario) => {
+      const { globalSettings } = get()
+      const modifiedEntries = getModifiedEntries(scenario)
+      return calculateIncomeStatement(modifiedEntries, globalSettings)
+    },
+
+    getBalanceSheet: (scenario) => {
+      const { globalSettings } = get()
+      const modifiedEntries = getModifiedEntries(scenario)
+      return calculateBalanceSheet(modifiedEntries, globalSettings)
+    },
+
+    getCashFlow: (scenario) => {
+      const { globalSettings } = get()
+      const modifiedEntries = getModifiedEntries(scenario)
+      const incomeStatement = get().getIncomeStatement(scenario)
+      const balanceSheet = get().getBalanceSheet(scenario)
+      // For now, we don't have a previous period in the store, so we pass null
+      return calculateCashFlow(modifiedEntries, incomeStatement, balanceSheet, null, globalSettings)
+    },
+  }
+})

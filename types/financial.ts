@@ -8,6 +8,7 @@ export enum Category {
   REVENUE = 'REVENUE',
   COGS = 'COGS', // Cost of Goods Sold
   OPEX = 'OPEX', // Operating Expenses
+  SALARY = 'SALARY', // Salaries and Wages
   ASSET = 'ASSET',
   LIABILITY = 'LIABILITY',
   EQUITY = 'EQUITY',
@@ -15,6 +16,16 @@ export enum Category {
   DA = 'D&A', // Depreciation & Amortization
   INTEREST = 'INTEREST',
   TAX = 'TAX',
+}
+
+export interface GlobalSettings {
+  vatRate: number;
+  salaryTaxRate: number;
+  pensionRate: number;
+  corporateTaxRate: number;
+  dso: number; // Days Sales Outstanding
+  dpo: number; // Days Payable Outstanding
+  exchangeRate: number;
 }
 
 /**

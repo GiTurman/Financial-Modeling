@@ -20,6 +20,8 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 import { cn } from '@/lib/utils'
 // import { ThemeToggle } from './ThemeToggle' // Assuming you create this component
 
+import { Sidebar } from './Sidebar'
+
 export function Navbar() {
   const { t } = useTranslation()
   const pathname = usePathname()
@@ -38,13 +40,13 @@ export function Navbar() {
     <header className="sticky top-0 z-30 flex h-[64px] items-center gap-4 border-b bg-background px-4 sm:px-6">
       <Sheet>
         <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="sm:hidden">
+          <Button size="icon" variant="outline" className="md:hidden">
             <PanelLeft className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs">
-          {/* Mobile Sidebar content would be rendered here */}
+        <SheetContent side="left" className="p-0 w-64">
+          <Sidebar />
         </SheetContent>
       </Sheet>
 

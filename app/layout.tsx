@@ -77,50 +77,31 @@ const navItems = [
   { href: '/tax-rates', labelKey: 'tax_rates', icon: Receipt }, // <-- Add new nav item
 ]
 
+import { Sidebar } from '@/components/layout/Sidebar'
+import { Navbar } from '@/components/layout/Navbar'
+import { I18nProvider } from '@/components/I18nProvider'
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const lang = 'en' // This would come from i18n context
-  const t = (key: string) => translations[lang][key] || key
-
   return (
-    <html lang={lang} suppressHydrationWarning>
-      <body className={cn('min-h-screen w-full bg-slate-50 font-sans antialiased', inter.className)}>
-        <TooltipProvider>
-          <div className="flex min-h-screen w-full flex-col">
-            <aside className="fixed inset-y-0 left-0 z-10 hidden w-[240px] flex-col border-r border-slate-200 bg-white sm:flex">
-              <div className="flex h-16 items-center border-b border-slate-100 px-6">
-                <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
-                  <div className="bg-indigo-600 p-1.5 rounded-lg">
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </div>
-                  <span className="tracking-tight">FinModel AI</span>
-                </Link>
+    <html lang="en" suppressHydrationWarning>
+      <body className={cn('min-h-screen w-full bg-muted/40 font-sans antialiased', inter.className)}>
+        <I18nProvider>
+          <TooltipProvider>
+            <div className="flex min-h-screen w-full flex-row">
+              <div className="hidden md:block">
+                <Sidebar />
               </div>
-              <nav className="flex flex-col gap-1 p-4">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50 hover:text-indigo-600"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {t(item.labelKey)}
-                  </Link>
-                ))}
-              </nav>
-            </aside>
-
-            <div className="flex flex-col sm:pl-[240px]">
-              <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-slate-200 bg-white px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 sm:py-4">
-                {/* ... rest of the header code ... */}
-              </header>
-              <main className="flex-1 p-4 sm:p-6">{children}</main>
+              <div className="flex flex-col flex-1">
+                <Navbar />
+                <main className="flex-1 p-4 sm:p-6">{children}</main>
+              </div>
             </div>
-          </div>
-        </TooltipProvider>
+          </TooltipProvider>
+        </I18nProvider>
       </body>
     </html>
   )

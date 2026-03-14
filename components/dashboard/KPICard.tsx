@@ -1,6 +1,7 @@
 // components/dashboard/KPICard.tsx
 'use client'
 
+import { useTranslation } from 'react-i18next'
 import { type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,6 +28,7 @@ const colorClasses = {
 }
 
 export function KPICard({ title, value, change, icon: Icon, color = 'blue', subtitle, loading }: KPICardProps) {
+  const { t } = useTranslation()
   if (loading) {
     return (
       <Card>
@@ -49,7 +51,7 @@ export function KPICard({ title, value, change, icon: Icon, color = 'blue', subt
           </div>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-light tracking-tight text-slate-900 kpi-number mt-2">{value}</div>
+          <div suppressHydrationWarning className="text-3xl font-light tracking-tight text-slate-900 kpi-number mt-2">{value}</div>
           {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
           {change !== undefined && (
             <div className="mt-3 flex items-center text-xs">
@@ -59,7 +61,7 @@ export function KPICard({ title, value, change, icon: Icon, color = 'blue', subt
               )}>
                 {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(1)}%
               </span>
-              <span className="text-slate-500 ml-2">vs last period</span>
+              <span className="text-slate-500 ml-2">{t('vs_last_period')}</span>
             </div>
           )}
         </CardContent>

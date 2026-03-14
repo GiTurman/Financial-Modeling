@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -72,6 +73,7 @@ const categoryColors: Record<Category, string> = {
   [Category.REVENUE]: 'bg-green-100/50 dark:bg-green-900/20',
   [Category.COGS]: 'bg-red-100/50 dark:bg-red-900/20',
   [Category.OPEX]: 'bg-orange-100/50 dark:bg-orange-900/20',
+  [Category.SALARY]: 'bg-amber-100/50 dark:bg-amber-900/20',
   [Category.ASSET]: 'bg-blue-100/50 dark:bg-blue-900/20',
   [Category.LIABILITY]: 'bg-purple-100/50 dark:bg-purple-900/20',
   [Category.EQUITY]: 'bg-teal-100/50 dark:bg-teal-900/20',
@@ -82,8 +84,7 @@ const categoryColors: Record<Category, string> = {
 }
 
 export default function InputPage() {
-  // TODO: Replace with useTranslation hook
-  const t = (key: string) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const { t } = useTranslation()
 
   const { entries, addEntry, removeEntry, clearAllEntries } = useFinancialStore()
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
@@ -108,14 +109,14 @@ export default function InputPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-light tracking-tight text-slate-900">{t('data_input')}</h1>
+      <h1 className="text-2xl font-semibold">{t('data_input')}</h1>
       
-      <Card className="border-slate-200/60 shadow-sm bg-white rounded-2xl overflow-hidden">
-        <CardHeader className="border-b border-slate-100/50 bg-slate-50/50 pb-4">
-          <CardTitle className="text-lg font-medium text-slate-800">{t('add_new_entry')}</CardTitle>
-          <CardDescription className="text-slate-500">{t('fill_out_the_form_to_add_a_financial_record')}</CardDescription>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('add_new_entry')}</CardTitle>
+          <CardDescription>{t('fill_out_the_form_to_add_a_financial_record')}</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6">
+        <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
             {/* Date Picker */}
             <div className="flex flex-col space-y-1.5">
@@ -197,10 +198,10 @@ export default function InputPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-slate-200/60 shadow-sm bg-white rounded-2xl overflow-hidden">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100/50 bg-slate-50/50 pb-4">
-          <CardTitle className="text-lg font-medium text-slate-800">{t('existing_entries')}</CardTitle>
-          <div className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('existing_entries')}</CardTitle>
+          <div className="flex items-center gap-2 pt-2">
             <Button variant="outline" size="sm">{t('import_csv')}</Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>

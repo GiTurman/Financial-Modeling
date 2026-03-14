@@ -34,7 +34,7 @@ const Dashboard: React.FC = () => {
         <div>
           <h2 className="text-3xl font-light tracking-tight text-slate-900">{t('dashboard')}</h2>
           <p className="text-slate-500 mt-1 flex items-center gap-2">
-            Scenario: <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 uppercase">{activeScenario}</span>
+            {t('scenario')}: <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 uppercase">{activeScenario}</span>
           </p>
         </div>
       </div>

@@ -1,3 +1,5 @@
+'use client'
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -10,7 +12,8 @@ import {
   TrendingUp, 
   Layers, 
   BrainCircuit,
-  Wallet
+  Wallet,
+  Settings
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -25,6 +28,7 @@ export const Sidebar: React.FC = () => {
     { href: '/cash-flow', icon: BarChart3, label: t('cashFlow') },
     { href: '/assumptions', icon: TrendingUp, label: t('assumptions') },
     { href: '/scenarios', icon: Layers, label: t('scenarios') },
+    { href: '/settings', icon: Settings, label: t('settings') },
     { href: '/ai-analysis', icon: BrainCircuit, label: t('aiAnalysis') },
   ];
 
